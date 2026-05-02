@@ -10,12 +10,17 @@ router.post("/", auth, async (req, res) => {
       return res.status(403).json({ msg: "Only admin can create tasks" });
     }
 
+    const { title, description, assignedTo } = req.body;
+
+    if (!assignedTo) {
+      return res.status(400).json({ msg: "User not assigned" });
+    }
+
     const task = await Task.create({
-      title: req.body.title,
-      description: req.body.description || "",
-      assignedTo: req.body.assignedTo || null,
-      projectId: req.body.projectId || null,
-      dueDate: req.body.dueDate || null
+      title,
+      description,
+      assignedTo,
+      status: "todo"
     });
 
     res.json(task);
@@ -25,14 +30,13 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-
 // ================= GET TASKS =================
 router.get("/", auth, async (req, res) => {
   try {
     let tasks;
 
     if (req.user.role === "admin") {
-      tasks = await Task.find();
+      tasks = await Task.find().populate("assignedTo", "name email");
     } else {
       tasks = await Task.find({ assignedTo: req.user.id });
     }
@@ -43,85 +47,26 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-
-// ================= UPDATE TASK (ADMIN) =================
-router.put("/:id", auth, async (req, res) => {
-  try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ msg: "Only admin can update task" });
-    }
-
-    const task = await Task.findByIdAndUpdate(
-      req.params.id,
-      {
-        title: req.body.title,
-        description: req.body.description,
-        status: req.body.status
-      },
-      { new: true }
-    );
-
-    res.json(task);
-  } catch (err) {
-    res.status(500).json({ msg: "Update failed" });
-  }
-});
-
-
-// ================= COMPLETE TASK (USER + ADMIN) =================
+// ================= COMPLETE TASK =================
 router.put("/:id/status", auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
 
-    if (!task) {
-      return res.status(404).json({ msg: "Task not found" });
-    }
+    if (!task) return res.status(404).json({ msg: "Task not found" });
 
     if (
-      task.assignedTo?.toString() !== req.user.id &&
+      task.assignedTo.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
       return res.status(403).json({ msg: "Not allowed" });
     }
 
-    task.status = req.body.status; // "done"
+    task.status = "done";
     await task.save();
 
     res.json(task);
   } catch (err) {
-    res.status(500).json({ msg: "Status update failed" });
-  }
-});
-
-
-// ================= DELETE TASK (ADMIN) =================
-router.delete("/:id", auth, async (req, res) => {
-  try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ msg: "Only admin can delete task" });
-    }
-
-    await Task.findByIdAndDelete(req.params.id);
-    res.json({ msg: "Task deleted" });
-  } catch (err) {
-    res.status(500).json({ msg: "Delete failed" });
-  }
-});
-
-
-// ================= DASHBOARD STATS =================
-router.get("/dashboard", auth, async (req, res) => {
-  try {
-    const total = await Task.countDocuments();
-    const completed = await Task.countDocuments({ status: "done" });
-    const overdue = await Task.countDocuments({
-      dueDate: { $lt: new Date() },
-      status: { $ne: "done" }
-    });
-
-    res.json({ total, completed, overdue });
-  } catch (err) {
-    res.status(500).json({ msg: "Dashboard error" });
+    res.status(500).json({ msg: "Update failed" });
   }
 });
 
