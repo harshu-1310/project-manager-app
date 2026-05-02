@@ -79,8 +79,7 @@ export default function Tasks() {
         `${API}/tasks/${id}`,
         { status },
         {
-          headers: { Authorization: token }
-        }
+headers: { Authorization: `Bearer ${token}` }        }
       );
       fetchTasks();
     } catch (err) {

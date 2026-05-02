@@ -3,33 +3,26 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import API from "./config";
 
-await axios.post(`${API}/auth/signup`, {...})
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-const API = "https://project-manager-app-production.up.railway.app/api";
   const signup = async () => {
     try {
       const res = await axios.post(`${API}/auth/signup`, {
         name,
         email,
-        password
+        password,
+        role: "member"
       });
 
-      alert("Signup successful! Please login.");
+      alert("Signup successful");
       window.location.href = "/";
 
     } catch (err) {
       console.log("SIGNUP ERROR:", err.response?.data || err.message);
-
-      if (err.response?.data?.msg) {
-        alert(err.response.data.msg);
-      } else {
-        alert("Signup failed");
-      }
-    }
+alert(err.response?.data?.msg || err.message);    }
   };
 
   return (
@@ -39,20 +32,17 @@ const API = "https://project-manager-app-production.up.railway.app/api";
 
         <input
           placeholder="Name"
-          value={name}
           onChange={e => setName(e.target.value)}
         />
 
         <input
           placeholder="Email"
-          value={email}
           onChange={e => setEmail(e.target.value)}
         />
 
         <input
-          placeholder="Password"
           type="password"
-          value={password}
+          placeholder="Password"
           onChange={e => setPassword(e.target.value)}
         />
 

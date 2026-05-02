@@ -1,12 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
+import API from "./config";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // 🔥 YOUR LIVE BACKEND URL
-const res = await axios.post("https://project-manager-app-production.up.railway.app/api/auth/login", {...});
   const login = async () => {
     try {
       const res = await axios.post(`${API}/auth/login`, {
@@ -14,29 +13,25 @@ const res = await axios.post("https://project-manager-app-production.up.railway.
         password
       });
 
-      console.log("LOGIN RESPONSE:", res.data);
-
       const token = res.data.token;
       const role = res.data.role;
 
-      if (!token) {
-        alert("Login failed: token missing");
+      if (!token || !role) {
+        alert("Login failed");
         return;
       }
 
-      // ✅ Save token & role
       localStorage.setItem("token", token);
-      localStorage.setItem("role", role || "member");
+      localStorage.setItem("role", role);
 
-      // ✅ Redirect
       if (role === "admin") {
         window.location.href = "/admin";
       } else {
-        window.location.href = "/dashboard"; // safer default
+        window.location.href = "/dashboard";
       }
 
     } catch (err) {
-      console.log("LOGIN ERROR:", err.response?.data || err.message);
+      console.log(err.response?.data || err.message);
       alert("Invalid email or password");
     }
   };

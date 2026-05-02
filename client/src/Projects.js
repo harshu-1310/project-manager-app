@@ -38,8 +38,7 @@ export default function Projects() {
           members: []
         },
         {
-          headers: { Authorization: token }
-        }
+headers: { Authorization: `Bearer ${token}` }        }
       );
 
       setName("");
