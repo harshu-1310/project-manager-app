@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API from "./config";
 
@@ -6,7 +7,16 @@ export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [name, setName] = useState("");
 
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/");
+      return;
+    }
+    fetchProjects();
+  }, [token]);
 
   const fetchProjects = async () => {
     try {
@@ -30,25 +40,28 @@ export default function Projects() {
       );
       setName("");
       fetchProjects();
-    } catch (err) {
-      alert("Failed to create project");
+    } catch {
+      alert("Failed to create project ❌");
     }
   };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
 
   return (
     <div className="main">
       <h1>Projects</h1>
 
-      <input value={name} onChange={e => setName(e.target.value)} />
+      <input
+        value={name}
+        placeholder="Project name"
+        onChange={e => setName(e.target.value)}
+      />
+
       <button onClick={createProject}>Create</button>
 
-      {projects.map(p => (
-        <div key={p._id}>{p.name}</div>
-      ))}
+      {projects.length === 0 ? (
+        <p>No projects</p>
+      ) : (
+        projects.map(p => <div key={p._id}>{p.name}</div>)
+      )}
     </div>
   );
 }

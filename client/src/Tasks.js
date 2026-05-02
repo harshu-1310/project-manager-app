@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API from "./config";
 
@@ -8,46 +9,76 @@ export default function Tasks() {
   const [title, setTitle] = useState("");
   const [projectId, setProjectId] = useState("");
 
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
+  useEffect(() => {
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
+    fetchProjects();
+    fetchTasks();
+  }, [token]);
+
   const fetchProjects = async () => {
-    const res = await axios.get(`${API}/projects`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setProjects(res.data);
+    try {
+      const res = await axios.get(`${API}/projects`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProjects(res.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const fetchTasks = async () => {
-    const res = await axios.get(`${API}/tasks`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setTasks(res.data);
+    try {
+      const res = await axios.get(`${API}/tasks`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTasks(res.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const createTask = async () => {
-    await axios.post(
-      `${API}/tasks`,
-      { title, projectId },
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-    fetchTasks();
-  };
+    if (!title || !projectId) {
+      alert("Fill all fields ❌");
+      return;
+    }
 
-  useEffect(() => {
-    fetchProjects();
-    fetchTasks();
-  }, []);
+    try {
+      await axios.post(
+        `${API}/tasks`,
+        { title, projectId },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setTitle("");
+      fetchTasks();
+
+    } catch {
+      alert("Task creation failed ❌");
+    }
+  };
 
   return (
     <div className="main">
       <h1>Tasks</h1>
 
-      <input value={title} onChange={e => setTitle(e.target.value)} />
+      <input
+        value={title}
+        placeholder="Task title"
+        onChange={e => setTitle(e.target.value)}
+      />
 
       <select onChange={e => setProjectId(e.target.value)}>
-        <option>Select Project</option>
+        <option value="">Select Project</option>
         {projects.map(p => (
           <option key={p._id} value={p._id}>
             {p.name}
@@ -57,9 +88,11 @@ export default function Tasks() {
 
       <button onClick={createTask}>Add Task</button>
 
-      {tasks.map(t => (
-        <div key={t._id}>{t.title}</div>
-      ))}
+      {tasks.length === 0 ? (
+        <p>No tasks</p>
+      ) : (
+        tasks.map(t => <div key={t._id}>{t.title}</div>)
+      )}
     </div>
   );
 }

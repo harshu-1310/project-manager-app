@@ -1,23 +1,31 @@
-export default function UserDashboard() {
-  const role = localStorage.getItem("role");
+import { useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
-  // 🔒 Protect route
-  if (role !== "member") {
-    window.location = "/";
-  }
+export default function UserDashboard() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    const token = localStorage.getItem("token");
+
+    if (!token || role !== "member") {
+      alert("Access denied ❌");
+      navigate("/");
+    }
+  }, [navigate]);
 
   const logout = () => {
     localStorage.clear();
-    window.location = "/";
+    navigate("/");
   };
 
   return (
     <div className="app">
       <div className="sidebar">
         <h2>User Panel</h2>
-        <a href="/tasks">My Tasks</a>
 
-        {/* 🔥 Logout */}
+        <Link to="/tasks">My Tasks</Link>
+
         <button onClick={logout}>Logout</button>
       </div>
 
