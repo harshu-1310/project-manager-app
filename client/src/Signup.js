@@ -6,39 +6,57 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // 🔥 YOUR LIVE BACKEND URL
+  const API = "https://project-manager-app.onrender.com/api";
+
   const signup = async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/signup", {
+      await axios.post(`${API}/auth/signup`, {
         name,
         email,
         password,
         role: "member"
       });
 
-      alert("Signup successful! Now login.");
-      window.location = "/";
+      alert("Signup successful! Please login.");
+      window.location.href = "/";
 
     } catch (err) {
-      alert("Signup failed");
-      console.log(err);
+      console.log("SIGNUP ERROR:", err.response?.data || err.message);
+      alert(err.response?.data?.msg || "Signup failed");
     }
   };
 
-return (
-  <div className="container">
-    <div className="auth-card">
-      <h2>Signup</h2>
+  return (
+    <div className="container">
+      <div className="auth-card">
+        <h2>Signup</h2>
 
-      <input placeholder="Name" onChange={e => setName(e.target.value)} />
-      <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
 
-      <button onClick={signup}>Signup</button>
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
 
-      <p>
-        Already have account? <a href="/">Login</a>
-      </p>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+
+        <button onClick={signup}>Signup</button>
+
+        <p>
+          Already have account? <a href="/">Login</a>
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
 }

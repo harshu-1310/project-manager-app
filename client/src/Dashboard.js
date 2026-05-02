@@ -7,14 +7,17 @@ export default function Dashboard() {
 
   const token = localStorage.getItem("token");
 
+  // 🔥 YOUR LIVE BACKEND URL
+  const API = "https://project-manager-app.onrender.com/api";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const t = await axios.get("http://localhost:5000/api/tasks", {
+        const t = await axios.get(`${API}/tasks`, {
           headers: { Authorization: token }
         });
 
-        const s = await axios.get("http://localhost:5000/api/tasks/dashboard", {
+        const s = await axios.get(`${API}/tasks/dashboard`, {
           headers: { Authorization: token }
         });
 
@@ -22,12 +25,12 @@ export default function Dashboard() {
         setStats(s.data);
 
       } catch (err) {
-        console.log(err);
+        console.log("Error:", err);
       }
     };
 
     fetchData();
-  }, []);
+  }, [token]);
 
   return (
     <div className="app">
@@ -36,8 +39,8 @@ export default function Dashboard() {
       <div className="sidebar">
         <h2>🚀 Manager</h2>
         <a href="/dashboard">Dashboard</a>
-<a href="/projects">Projects</a>
-<a href="/tasks">Tasks</a>
+        <a href="/projects">Projects</a>
+        <a href="/tasks">Tasks</a>
       </div>
 
       {/* Main */}
@@ -55,12 +58,16 @@ export default function Dashboard() {
         {/* Task List */}
         <h2>Tasks</h2>
 
-        {tasks.map(task => (
-          <div className="card" key={task._id}>
-            <h3>{task.title}</h3>
-            <p>Status: {task.status}</p>
-          </div>
-        ))}
+        {tasks.length === 0 ? (
+          <p>No tasks available</p>
+        ) : (
+          tasks.map(task => (
+            <div className="card" key={task._id}>
+              <h3>{task.title}</h3>
+              <p>Status: {task.status}</p>
+            </div>
+          ))
+        )}
 
       </div>
     </div>

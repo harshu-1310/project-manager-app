@@ -7,26 +7,53 @@ export default function Projects() {
 
   const token = localStorage.getItem("token");
 
+  // 🔥 LIVE BACKEND URL
+  const API = "https://project-manager-app.onrender.com/api";
+
+  // ✅ Fetch Projects
   const fetchProjects = async () => {
-    const res = await axios.get("http://localhost:5000/api/projects", {
-      headers: { Authorization: token }
-    });
-    setProjects(res.data);
+    try {
+      const res = await axios.get(`${API}/projects`, {
+        headers: { Authorization: token }
+      });
+      setProjects(res.data);
+    } catch (err) {
+      console.log("PROJECT ERROR:", err.response?.data || err.message);
+    }
   };
 
+  // ✅ Create Project
   const createProject = async () => {
-    await axios.post(
-      "http://localhost:5000/api/projects",
-      { name, description: "New Project", members: [] },
-      { headers: { Authorization: token } }
-    );
-    setName("");
-    fetchProjects();
+    try {
+      if (!name) {
+        alert("Enter project name");
+        return;
+      }
+
+      await axios.post(
+        `${API}/projects`,
+        {
+          name,
+          description: "New Project",
+          members: []
+        },
+        {
+          headers: { Authorization: token }
+        }
+      );
+
+      setName("");
+      fetchProjects();
+
+    } catch (err) {
+      console.log("CREATE PROJECT ERROR:", err.response?.data || err.message);
+      alert("Failed to create project");
+    }
   };
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [token]);
 
   return (
     <div className="main">
@@ -37,11 +64,18 @@ export default function Projects() {
         value={name}
         onChange={e => setName(e.target.value)}
       />
+
       <button onClick={createProject}>Create</button>
 
-      {projects.map(p => (
-        <div className="card" key={p._id}>{p.name}</div>
-      ))}
+      {projects.length === 0 ? (
+        <p>No projects yet</p>
+      ) : (
+        projects.map(p => (
+          <div className="card" key={p._id}>
+            {p.name}
+          </div>
+        ))
+      )}
     </div>
   );
 }

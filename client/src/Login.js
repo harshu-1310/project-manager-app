@@ -5,34 +5,35 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // 🔥 YOUR LIVE BACKEND URL
+  const API = "https://project-manager-app.onrender.com/api";
+
   const login = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(`${API}/auth/login`, {
         email,
         password
       });
 
-      // 🔍 DEBUG (check in console)
       console.log("LOGIN RESPONSE:", res.data);
 
       const token = res.data.token;
       const role = res.data.role;
 
-      // ❌ Safety check
-      if (!token || !role) {
-        alert("Login failed: role or token missing");
+      if (!token) {
+        alert("Login failed: token missing");
         return;
       }
 
-      // ✅ Store in localStorage
+      // ✅ Save token & role
       localStorage.setItem("token", token);
-      localStorage.setItem("role", role);
+      localStorage.setItem("role", role || "member");
 
-      // ✅ Redirect based on role
+      // ✅ Redirect
       if (role === "admin") {
         window.location.href = "/admin";
       } else {
-        window.location.href = "/user";
+        window.location.href = "/dashboard"; // safer default
       }
 
     } catch (err) {

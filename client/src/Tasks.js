@@ -10,10 +10,13 @@ export default function Tasks() {
 
   const token = localStorage.getItem("token");
 
+  // 🔥 LIVE BACKEND URL
+  const API = "https://project-manager-app.onrender.com/api";
+
   // ✅ Fetch Projects
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/projects", {
+      const res = await axios.get(`${API}/projects`, {
         headers: { Authorization: token }
       });
       setProjects(res.data);
@@ -25,7 +28,7 @@ export default function Tasks() {
   // ✅ Fetch Tasks
   const fetchTasks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/tasks", {
+      const res = await axios.get(`${API}/tasks`, {
         headers: { Authorization: token }
       });
       setTasks(res.data);
@@ -50,11 +53,8 @@ export default function Tasks() {
       setLoading(true);
 
       await axios.post(
-        "http://localhost:5000/api/tasks",
-        {
-          title,
-          projectId
-        },
+        `${API}/tasks`,
+        { title, projectId },
         {
           headers: { Authorization: token }
         }
@@ -76,7 +76,7 @@ export default function Tasks() {
   const updateStatus = async (id, status) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/tasks/${id}`,
+        `${API}/tasks/${id}`,
         { status },
         {
           headers: { Authorization: token }
@@ -94,13 +94,13 @@ export default function Tasks() {
 
     const interval = setInterval(fetchTasks, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [token]);
 
   return (
     <div className="main">
       <h1>Tasks</h1>
 
-      {/* 🔴 If NO projects */}
+      {/* No Projects */}
       {projects.length === 0 ? (
         <div className="card">
           <p>⚠️ No projects found</p>
@@ -115,7 +115,6 @@ export default function Tasks() {
             onChange={e => setTitle(e.target.value)}
           />
 
-          {/* ✅ Project Dropdown */}
           <select
             value={projectId}
             onChange={e => setProjectId(e.target.value)}
@@ -134,7 +133,7 @@ export default function Tasks() {
         </div>
       )}
 
-      {/* ✅ Task List */}
+      {/* Task List */}
       {tasks.length === 0 ? (
         <p>No tasks yet</p>
       ) : (
