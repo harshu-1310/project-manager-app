@@ -4,17 +4,20 @@ module.exports = function (req, res, next) {
   let token = req.header("Authorization");
 
   if (!token) {
-    return res.status(401).json({ msg: "No token" });
+    return res.status(401).json({ msg: "No token, access denied" });
   }
 
-  // ✅ REMOVE "Bearer "
+  // Remove "Bearer "
   if (token.startsWith("Bearer ")) {
-    token = token.slice(7, token.length);
+    token = token.slice(7);
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // decoded = { id, role }
     req.user = decoded;
+
     next();
   } catch (err) {
     res.status(401).json({ msg: "Invalid token" });
