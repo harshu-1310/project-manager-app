@@ -8,8 +8,7 @@ export default function Dashboard() {
   const token = localStorage.getItem("token");
 
   // 🔥 YOUR LIVE BACKEND URL
-  const API = "https://project-manager-app.onrender.com/api";
-
+await axios.get("https://project-manager-app-production.up.railway.app/api/tasks", {...});
   useEffect(() => {
     const fetchData = async () => {
       try {

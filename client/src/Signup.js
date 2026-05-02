@@ -1,14 +1,15 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import API from "./config";
 
+await axios.post(`${API}/auth/signup`, {...})
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const API = "https://project-manager-app.onrender.com/api";
-
+const API = "https://project-manager-app-production.up.railway.app/api";
   const signup = async () => {
     try {
       const res = await axios.post(`${API}/auth/signup`, {

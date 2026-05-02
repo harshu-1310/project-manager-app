@@ -6,8 +6,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   // 🔥 YOUR LIVE BACKEND URL
-  const API = "https://project-manager-app.onrender.com/api";
-
+const res = await axios.post("https://project-manager-app-production.up.railway.app/api/auth/login", {...});
   const login = async () => {
     try {
       const res = await axios.post(`${API}/auth/login`, {
