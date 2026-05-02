@@ -12,19 +12,20 @@ export default function Signup() {
 
   const signup = async () => {
     try {
-      await axios.post(`${API}/auth/signup`, {
+      const res = await axios.post(`${API}/auth/signup`, {
         name,
         email,
         password
       });
 
-      alert("Signup successful ✅");
+      console.log(res.data);
 
+      alert("Signup successful ✅");
       navigate("/");
 
     } catch (err) {
-      console.log(err.response?.data);
-      alert("Signup failed ❌");
+      console.log("ERROR:", err.response?.data);
+      alert(err.response?.data?.msg || "Signup failed ❌");
     }
   };
 
@@ -33,21 +34,9 @@ export default function Signup() {
       <div className="auth-card">
         <h2>Signup</h2>
 
-        <input
-          placeholder="Name"
-          onChange={e => setName(e.target.value)}
-        />
-
-        <input
-          placeholder="Email"
-          onChange={e => setEmail(e.target.value)}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={e => setPassword(e.target.value)}
-        />
+        <input placeholder="Name" onChange={e => setName(e.target.value)} />
+        <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
+        <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
 
         <button onClick={signup}>Signup</button>
 

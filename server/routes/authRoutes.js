@@ -7,11 +7,14 @@ const jwt = require("jsonwebtoken");
 // ✅ SIGNUP
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
-    // check existing user
-    const existing = await User.findOne({ email });
-    if (existing) {
+    if (!name || !email || !password) {
+      return res.status(400).json({ msg: "All fields required" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res.status(400).json({ msg: "User already exists" });
     }
 
@@ -21,17 +24,18 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       password: hashed,
-      role: role || "member"
+      role: "member"
     });
 
-    res.status(201).json({ msg: "Signup successful" });
+    res.status(201).json({
+      msg: "User created successfully"
+    });
 
   } catch (err) {
-    console.log("SIGNUP ERROR:", err);
+    console.log(err);
     res.status(500).json({ msg: "Server error" });
   }
 });
-
 // ✅ LOGIN
 router.post("/login", async (req, res) => {
   try {
