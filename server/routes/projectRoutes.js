@@ -61,5 +61,26 @@ router.delete("/:id", auth, async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 });
+// UPDATE PROJECT (ADMIN)
+router.put("/:id", auth, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ msg: "Only admin can edit project" });
+    }
+
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: req.body.name,
+        description: req.body.description
+      },
+      { new: true }
+    );
+
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ msg: "Update failed" });
+  }
+});
 
 module.exports = router;
