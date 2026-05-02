@@ -14,16 +14,20 @@ export default function Signup() {
       const res = await axios.post(`${API}/auth/signup`, {
         name,
         email,
-        password,
-        role: "member"
+        password
       });
 
-      alert("Signup successful");
+      alert("Signup successful! Please login.");
       window.location.href = "/";
 
     } catch (err) {
       console.log("SIGNUP ERROR:", err.response?.data || err.message);
-      alert("Signup failed");
+
+      if (err.response?.data?.msg) {
+        alert(err.response.data.msg);
+      } else {
+        alert("Signup failed");
+      }
     }
   };
 
@@ -32,13 +36,30 @@ export default function Signup() {
       <div className="auth-card">
         <h2>Signup</h2>
 
-        <input placeholder="Name" onChange={e => setName(e.target.value)} />
-        <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
-        <input placeholder="Password" type="password" onChange={e => setPassword(e.target.value)} />
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+
+        <input
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
 
         <button onClick={signup}>Signup</button>
 
-        <p>Already have account? <Link to="/">Login</Link></p>
+        <p>
+          Already have account? <Link to="/">Login</Link>
+        </p>
       </div>
     </div>
   );
