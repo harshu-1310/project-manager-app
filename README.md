@@ -1,4 +1,4 @@
-**                                     Team Task Manager (Full-Stack)
+**                                     Team Task Manager (Full-Stack) **
 📌 Overview
 
 The Team Task Manager is a full-stack web application that allows users to create projects, assign tasks, and track progress efficiently. It supports role-based access control where admins can manage projects and users, while members can view and update assigned tasks. The system provides a centralized dashboard to monitor task status and deadlines. It is designed to improve team collaboration and productivity. This project follows REST API architecture with proper validations and database relationships.
