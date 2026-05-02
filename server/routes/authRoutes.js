@@ -3,65 +3,44 @@ const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const auth = require("../middleware/auth");
 
-// 🔐 SIGNUP
+// ================= SIGNUP =================
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ msg: "All fields required" });
-    }
+    let user = await User.findOne({ email });
+    if (user) return res.status(400).json({ msg: "User already exists" });
 
-    const existingUser = await User.findOne({ email });
+    const hashed = await bcrypt.hash(password, 10);
 
-    if (existingUser) {
-      return res.status(400).json({ msg: "User already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
+    user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password: hashed,
       role: role || "member"
     });
 
-    res.status(201).json({
-      msg: "Signup successful",
-      role: user.role
-    });
-
+    res.json({ msg: "User registered" });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ msg: "Signup error" });
   }
 });
 
-
-// 🔐 LOGIN
+// ================= LOGIN =================
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({ msg: "User not found" });
-    }
+    if (!user) return res.status(400).json({ msg: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ msg: "Wrong password" });
-    }
+    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
     const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role
-      },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -70,10 +49,18 @@ router.post("/login", async (req, res) => {
       token,
       role: user.role
     });
-
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ msg: "Login error" });
+  }
+});
+
+// ================= GET USERS (ADMIN USE) =================
+router.get("/users", auth, async (req, res) => {
+  try {
+    const users = await User.find({ role: "member" }).select("_id name email");
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ msg: "Fetch users failed" });
   }
 });
 

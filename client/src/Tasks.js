@@ -4,16 +4,23 @@ import API from "./config";
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
+  const [users, setUsers] = useState([]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-
-  const [editId, setEditId] = useState(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDesc, setEditDesc] = useState("");
+  const [assignedTo, setAssignedTo] = useState("");
 
   const token = localStorage.getItem("token");
 
+  // ================= FETCH USERS =================
+  const fetchUsers = async () => {
+    const res = await axios.get(`${API}/auth/users`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setUsers(res.data);
+  };
+
+  // ================= FETCH TASKS =================
   const fetchTasks = async () => {
     const res = await axios.get(`${API}/tasks`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -21,50 +28,40 @@ export default function Tasks() {
     setTasks(res.data);
   };
 
+  // ================= CREATE TASK =================
   const createTask = async () => {
-    if (!title) {
-      alert("Enter task title");
+    if (!title || !assignedTo) {
+      alert("Fill all fields");
       return;
     }
 
     await axios.post(
       `${API}/tasks`,
-      { title, description },
-      { headers: { Authorization: `Bearer ${token}` } }
+      {
+        title,
+        description,
+        assignedTo
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
     );
 
     setTitle("");
     setDescription("");
-    fetchTasks();
-  };
-
-  const deleteTask = async (id) => {
-    await axios.delete(`${API}/tasks/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    setAssignedTo("");
 
     fetchTasks();
   };
 
-  const updateTask = async (id) => {
-    await axios.put(
-      `${API}/tasks/${id}`,
-      {
-        title: editTitle,
-        description: editDesc
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    setEditId(null);
-    fetchTasks();
-  };
-
-  const markComplete = async (id) => {
+  // ================= COMPLETE TASK =================
+  const completeTask = async (id) => {
     await axios.put(
       `${API}/tasks/${id}/status`,
-      { status: "done" },
-      { headers: { Authorization: `Bearer ${token}` } }
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
     );
 
     fetchTasks();
@@ -72,13 +69,14 @@ export default function Tasks() {
 
   useEffect(() => {
     fetchTasks();
+    fetchUsers();
   }, []);
 
   return (
     <div className="main">
       <h1>Tasks</h1>
 
-      {/* CREATE */}
+      {/* ADMIN CREATE */}
       <input
         placeholder="Task Title"
         value={title}
@@ -91,88 +89,48 @@ export default function Tasks() {
         onChange={(e) => setDescription(e.target.value)}
       />
 
+      <select onChange={(e) => setAssignedTo(e.target.value)}>
+        <option value="">Assign User</option>
+        {users.map((u) => (
+          <option key={u._id} value={u._id}>
+            {u.name} ({u.email})
+          </option>
+        ))}
+      </select>
+
       <button onClick={createTask}>Add Task</button>
 
       <hr />
 
-      {/* LIST */}
+      {/* TASK LIST */}
       {tasks.map((t) => (
         <div
           key={t._id}
           style={{
             border: "1px solid #444",
             padding: "15px",
-            marginBottom: "15px",
+            marginBottom: "10px",
             borderRadius: "8px"
           }}
         >
-          {editId === t._id ? (
-            <>
-              <input
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-              />
+          <h3>{t.title}</h3>
+          <p>{t.description}</p>
 
-              <textarea
-                value={editDesc}
-                onChange={(e) => setEditDesc(e.target.value)}
-              />
-
-              <button onClick={() => updateTask(t._id)}>Save</button>
-              <button onClick={() => setEditId(null)}>Cancel</button>
-            </>
-          ) : (
-            <>
-              <h3>{t.title}</h3>
-              <p>{t.description}</p>
-
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-
-                {/* COMPLETE BUTTON */}
-                {t.status !== "done" && (
-                  <button
-                    onClick={() => markComplete(t._id)}
-                    style={{
-                      background: "#22c55e",
-                      color: "white",
-                      padding: "6px 12px",
-                      borderRadius: "6px"
-                    }}
-                  >
-                    Complete
-                  </button>
-                )}
-
-                <button
-                  onClick={() => {
-                    setEditId(t._id);
-                    setEditTitle(t.title);
-                    setEditDesc(t.description);
-                  }}
-                  style={{
-                    background: "#10b981",
-                    color: "white",
-                    padding: "6px 12px",
-                    borderRadius: "6px"
-                  }}
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => deleteTask(t._id)}
-                  style={{
-                    background: "#3b82f6",
-                    color: "white",
-                    padding: "6px 12px",
-                    borderRadius: "6px"
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            </>
+          {t.status !== "done" && (
+            <button
+              onClick={() => completeTask(t._id)}
+              style={{
+                background: "#22c55e",
+                color: "white",
+                padding: "6px 12px",
+                borderRadius: "6px"
+              }}
+            >
+              Complete
+            </button>
           )}
+
+          {t.status === "done" && <p>✅ Completed</p>}
         </div>
       ))}
     </div>
