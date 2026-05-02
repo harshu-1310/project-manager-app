@@ -85,39 +85,39 @@ export default function Projects() {
       <hr />
 
       {/* PROJECT LIST */}
-      {projects.map(p => (
-        <div
-          key={p._id}
-          style={{
-            border: "1px solid #444",
-            padding: "15px",
-            marginBottom: "15px",
-            borderRadius: "8px",
-            position: "relative"
-          }}
-        >
-          {/* SMALL RIGHT DELETE BUTTON */}
-          <button
-            onClick={() => deleteProject(p._id)}
-            style={{
-              position: "absolute",
-              right: "10px",
-              top: "10px",
-              padding: "5px 10px",
-              background: "#ff4d4d",
-              border: "none",
-              borderRadius: "5px",
-              color: "white",
-              cursor: "pointer"
-            }}
-          >
-            ✖
-          </button>
+     {projects.map(p => (
+  <div
+    key={p._id}
+    style={{
+      border: "1px solid #444",
+      padding: "15px",
+      marginBottom: "15px",
+      borderRadius: "8px"
+    }}
+  >
+    <h3>{p.name}</h3>
 
-          <h3>{p.name}</h3>
-          <p>{p.description}</p>
-        </div>
-      ))}
+    <p>{p.description}</p>
+
+    {/* ✅ BLUE DELETE BUTTON (RIGHT SIDE) */}
+    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <button
+        onClick={() => deleteProject(p._id)}
+        style={{
+          background: "#3b82f6",
+          color: "white",
+          border: "none",
+          padding: "6px 14px",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontSize: "14px"
+        }}
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+))}
     </div>
   );
 }
