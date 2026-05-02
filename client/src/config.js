@@ -1,3 +1,3 @@
-const API = "https://project-manager-app-production.up.railway.app/api";
+const API = "https://project-manager-backend.onrender.com/api";
 
 export default API;
