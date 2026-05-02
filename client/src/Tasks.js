@@ -1,98 +1,152 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API from "./config";
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState("");
 
-  const navigate = useNavigate();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  const [editId, setEditId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/");
-      return;
-    }
-
-    fetchProjects();
-    fetchTasks();
-  }, [token]);
-
-  const fetchProjects = async () => {
-    try {
-      const res = await axios.get(`${API}/projects`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setProjects(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const fetchTasks = async () => {
-    try {
-      const res = await axios.get(`${API}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setTasks(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+    const res = await axios.get(`${API}/tasks`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setTasks(res.data);
   };
 
   const createTask = async () => {
-    if (!title || !projectId) {
-      alert("Fill all fields ❌");
-      return;
-    }
+    await axios.post(
+      `${API}/tasks`,
+      { title, description },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
+    setTitle("");
+    setDescription("");
+    fetchTasks();
+  };
+
+  const deleteTask = async (id) => {
     try {
-      await axios.post(
-        `${API}/tasks`,
-        { title, projectId },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
-      setTitle("");
+      await axios.delete(`${API}/tasks/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       fetchTasks();
-
     } catch {
-      alert("Task creation failed ❌");
+      alert("Delete failed");
     }
   };
+
+  const updateTask = async (id) => {
+    await axios.put(
+      `${API}/tasks/${id}`,
+      {
+        title: editTitle,
+        description: editDesc
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setEditId(null);
+    fetchTasks();
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   return (
     <div className="main">
       <h1>Tasks</h1>
 
+      {/* CREATE */}
       <input
+        placeholder="Task Title"
         value={title}
-        placeholder="Task title"
-        onChange={e => setTitle(e.target.value)}
+        onChange={(e) => setTitle(e.target.value)}
       />
 
-      <select onChange={e => setProjectId(e.target.value)}>
-        <option value="">Select Project</option>
-        {projects.map(p => (
-          <option key={p._id} value={p._id}>
-            {p.name}
-          </option>
-        ))}
-      </select>
+      <textarea
+        placeholder="Task Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
 
       <button onClick={createTask}>Add Task</button>
 
-      {tasks.length === 0 ? (
-        <p>No tasks</p>
-      ) : (
-        tasks.map(t => <div key={t._id}>{t.title}</div>)
-      )}
+      <hr />
+
+      {/* LIST */}
+      {tasks.map((t) => (
+        <div
+          key={t._id}
+          style={{
+            border: "1px solid #444",
+            padding: "15px",
+            marginBottom: "15px",
+            borderRadius: "8px"
+          }}
+        >
+          {editId === t._id ? (
+            <>
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+
+              <textarea
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+              />
+
+              <button onClick={() => updateTask(t._id)}>Save</button>
+              <button onClick={() => setEditId(null)}>Cancel</button>
+            </>
+          ) : (
+            <>
+              <h3>{t.title}</h3>
+              <p>{t.description}</p>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                <button
+                  onClick={() => {
+                    setEditId(t._id);
+                    setEditTitle(t.title);
+                    setEditDesc(t.description);
+                  }}
+                  style={{
+                    background: "#10b981",
+                    color: "white",
+                    padding: "6px 12px",
+                    borderRadius: "6px"
+                  }}
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => deleteTask(t._id)}
+                  style={{
+                    background: "#3b82f6",
+                    color: "white",
+                    padding: "6px 12px",
+                    borderRadius: "6px"
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
