@@ -14,48 +14,86 @@ export default function Tasks() {
 
   const token = localStorage.getItem("token");
 
+  // ============================
+  // FETCH TASKS
+  // ============================
   const fetchTasks = async () => {
-    const res = await axios.get(`${API}/tasks`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setTasks(res.data);
+    try {
+      const res = await axios.get(`${API}/tasks`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTasks(res.data);
+    } catch (err) {
+      console.log(err.response?.data || err.message);
+    }
   };
 
+  // ============================
+  // CREATE TASK
+  // ============================
   const createTask = async () => {
-    await axios.post(
-      `${API}/tasks`,
-      { title, description },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    if (!title) {
+      alert("Enter task title ❗");
+      return;
+    }
 
-    setTitle("");
-    setDescription("");
-    fetchTasks();
+    try {
+      await axios.post(
+        `${API}/tasks`,
+        { title, description },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("Task created ✅");
+
+      setTitle("");
+      setDescription("");
+      fetchTasks();
+    } catch (err) {
+      console.log(err.response?.data || err.message);
+      alert(err.response?.data?.msg || "Task creation failed ❌");
+    }
   };
 
+  // ============================
+  // DELETE TASK
+  // ============================
   const deleteTask = async (id) => {
     try {
       await axios.delete(`${API}/tasks/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      alert("Task deleted 🗑");
       fetchTasks();
-    } catch {
-      alert("Delete failed");
+    } catch (err) {
+      console.log(err.response?.data || err.message);
+      alert("Delete failed ❌");
     }
   };
 
+  // ============================
+  // UPDATE TASK
+  // ============================
   const updateTask = async (id) => {
-    await axios.put(
-      `${API}/tasks/${id}`,
-      {
-        title: editTitle,
-        description: editDesc
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    try {
+      await axios.put(
+        `${API}/tasks/${id}`,
+        {
+          title: editTitle,
+          description: editDesc
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    setEditId(null);
-    fetchTasks();
+      alert("Task updated ✏️");
+
+      setEditId(null);
+      fetchTasks();
+    } catch (err) {
+      console.log(err.response?.data || err.message);
+      alert("Update failed ❌");
+    }
   };
 
   useEffect(() => {
@@ -66,7 +104,7 @@ export default function Tasks() {
     <div className="main">
       <h1>Tasks</h1>
 
-      {/* CREATE */}
+      {/* ================= CREATE ================= */}
       <input
         placeholder="Task Title"
         value={title}
@@ -83,7 +121,7 @@ export default function Tasks() {
 
       <hr />
 
-      {/* LIST */}
+      {/* ================= LIST ================= */}
       {tasks.map((t) => (
         <div
           key={t._id}
@@ -96,6 +134,7 @@ export default function Tasks() {
         >
           {editId === t._id ? (
             <>
+              {/* EDIT MODE */}
               <input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
@@ -111,10 +150,17 @@ export default function Tasks() {
             </>
           ) : (
             <>
+              {/* VIEW MODE */}
               <h3>{t.title}</h3>
-              <p>{t.description}</p>
+              <p>{t.description || "No description"}</p>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "10px"
+                }}
+              >
                 <button
                   onClick={() => {
                     setEditId(t._id);
@@ -125,7 +171,8 @@ export default function Tasks() {
                     background: "#10b981",
                     color: "white",
                     padding: "6px 12px",
-                    borderRadius: "6px"
+                    borderRadius: "6px",
+                    border: "none"
                   }}
                 >
                   Edit
@@ -137,7 +184,8 @@ export default function Tasks() {
                     background: "#3b82f6",
                     color: "white",
                     padding: "6px 12px",
-                    borderRadius: "6px"
+                    borderRadius: "6px",
+                    border: "none"
                   }}
                 >
                   Delete
