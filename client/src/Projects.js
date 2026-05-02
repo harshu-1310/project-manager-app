@@ -9,6 +9,7 @@ export default function Projects() {
 
   const token = localStorage.getItem("token");
 
+  // ================= FETCH =================
   const fetchProjects = async () => {
     try {
       const res = await axios.get(`${API}/projects`, {
@@ -20,13 +21,14 @@ export default function Projects() {
     }
   };
 
+  // ================= CREATE =================
   const createProject = async () => {
     try {
       await axios.post(
         `${API}/projects`,
         {
           name,
-          description   // ✅ ADD THIS
+          description
         },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -38,7 +40,23 @@ export default function Projects() {
       fetchProjects();
 
     } catch (err) {
-      alert(err.response?.data?.msg || "Failed to create project");
+      alert(err.response?.data?.msg || "Create failed");
+    }
+  };
+
+  // ================= DELETE =================
+  const deleteProject = async (id) => {
+    if (!window.confirm("Delete this project?")) return;
+
+    try {
+      await axios.delete(`${API}/projects/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      fetchProjects();
+
+    } catch (err) {
+      alert(err.response?.data?.msg || "Delete failed");
     }
   };
 
@@ -50,14 +68,13 @@ export default function Projects() {
     <div className="main">
       <h1>Projects</h1>
 
-      {/* PROJECT TITLE */}
+      {/* CREATE FORM */}
       <input
         placeholder="Project Title"
         value={name}
         onChange={e => setName(e.target.value)}
       />
 
-      {/* PROBLEM STATEMENT */}
       <textarea
         placeholder="Problem Statement / Description"
         value={description}
@@ -69,11 +86,15 @@ export default function Projects() {
 
       <hr />
 
-      {/* DISPLAY PROJECTS */}
+      {/* PROJECT LIST */}
       {projects.map(p => (
-        <div key={p._id} style={{ marginBottom: "15px" }}>
+        <div key={p._id} style={{ marginBottom: "20px" }}>
           <h3>{p.name}</h3>
-          <p>{p.description}</p> {/* ✅ SHOW DESCRIPTION */}
+          <p>{p.description}</p>
+
+          <button onClick={() => deleteProject(p._id)}>
+            Delete
+          </button>
         </div>
       ))}
     </div>
