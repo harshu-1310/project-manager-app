@@ -1,22 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API from "./config";
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
 
-  const navigate = useNavigate();
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    if (!token) {
-      navigate("/");
-      return;
-    }
-    fetchProjects();
-  }, [token]);
 
   const fetchProjects = async () => {
     try {
@@ -25,7 +16,7 @@ export default function Projects() {
       });
       setProjects(res.data);
     } catch (err) {
-      console.log(err.response?.data || err.message);
+      console.log(err);
     }
   };
 
@@ -33,35 +24,58 @@ export default function Projects() {
     try {
       await axios.post(
         `${API}/projects`,
-        { name },
+        {
+          name,
+          description   // ✅ ADD THIS
+        },
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+
       setName("");
+      setDescription("");
       fetchProjects();
-    } catch {
-      alert("Failed to create project ❌");
+
+    } catch (err) {
+      alert(err.response?.data?.msg || "Failed to create project");
     }
   };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   return (
     <div className="main">
       <h1>Projects</h1>
 
+      {/* PROJECT TITLE */}
       <input
+        placeholder="Project Title"
         value={name}
-        placeholder="Project name"
         onChange={e => setName(e.target.value)}
+      />
+
+      {/* PROBLEM STATEMENT */}
+      <textarea
+        placeholder="Problem Statement / Description"
+        value={description}
+        onChange={e => setDescription(e.target.value)}
+        rows={4}
       />
 
       <button onClick={createProject}>Create</button>
 
-      {projects.length === 0 ? (
-        <p>No projects</p>
-      ) : (
-        projects.map(p => <div key={p._id}>{p.name}</div>)
-      )}
+      <hr />
+
+      {/* DISPLAY PROJECTS */}
+      {projects.map(p => (
+        <div key={p._id} style={{ marginBottom: "15px" }}>
+          <h3>{p.name}</h3>
+          <p>{p.description}</p> {/* ✅ SHOW DESCRIPTION */}
+        </div>
+      ))}
     </div>
   );
 }
