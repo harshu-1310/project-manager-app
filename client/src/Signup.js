@@ -9,22 +9,22 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("member");
 
   const signup = async () => {
     try {
-      const res = await axios.post(`${API}/auth/signup`, {
+      await axios.post(`${API}/auth/signup`, {
         name,
         email,
-        password
+        password,
+        role
       });
-
-      console.log(res.data);
 
       alert("Signup successful ✅");
       navigate("/");
 
     } catch (err) {
-      console.log("ERROR:", err.response?.data);
+      console.log(err.response?.data);
       alert(err.response?.data?.msg || "Signup failed ❌");
     }
   };
@@ -37,6 +37,12 @@ export default function Signup() {
         <input placeholder="Name" onChange={e => setName(e.target.value)} />
         <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
         <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
+
+        {/* 🔥 ROLE SELECT */}
+        <select onChange={e => setRole(e.target.value)}>
+          <option value="member">User</option>
+          <option value="admin">Admin</option>
+        </select>
 
         <button onClick={signup}>Signup</button>
 

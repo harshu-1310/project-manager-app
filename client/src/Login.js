@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import API from "./config";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -19,15 +21,18 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
 
+      alert("Login successful ✅");
+
+      // 🔥 ROLE BASED REDIRECT
       if (role === "admin") {
-        window.location.href = "/admin";
+        navigate("/admin");
       } else {
-        window.location.href = "/user";
+        navigate("/user");
       }
 
     } catch (err) {
       console.log(err.response?.data || err.message);
-      alert("Invalid credentials");
+      alert("Invalid credentials ❌");
     }
   };
 
@@ -40,9 +45,10 @@ export default function Login() {
         <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
 
         <button onClick={login}>Login</button>
+
         <p>
-  New user? <Link to="/signup">Signup</Link>
-</p>
+          New user? <Link to="/signup">Signup</Link>
+        </p>
       </div>
     </div>
   );
