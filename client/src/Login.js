@@ -13,13 +13,7 @@ export default function Login() {
         password
       });
 
-      const token = res.data.token;
-      const role = res.data.role;
-
-      if (!token || !role) {
-        alert("Login failed");
-        return;
-      }
+      const { token, role } = res.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
@@ -27,12 +21,12 @@ export default function Login() {
       if (role === "admin") {
         window.location.href = "/admin";
       } else {
-        window.location.href = "/dashboard";
+        window.location.href = "/user";
       }
 
     } catch (err) {
       console.log(err.response?.data || err.message);
-      alert("Invalid email or password");
+      alert("Invalid credentials");
     }
   };
 
@@ -41,25 +35,10 @@ export default function Login() {
       <div className="auth-card">
         <h2>Login</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
+        <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
+        <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
 
         <button onClick={login}>Login</button>
-
-        <p>
-          New user? <a href="/signup">Signup</a>
-        </p>
       </div>
     </div>
   );
