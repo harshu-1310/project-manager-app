@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import API from "./config";
@@ -39,6 +40,9 @@ export default function Login() {
         <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
 
         <button onClick={login}>Login</button>
+        <p>
+  New user? <Link to="/signup">Signup</Link>
+</p>
       </div>
     </div>
   );
