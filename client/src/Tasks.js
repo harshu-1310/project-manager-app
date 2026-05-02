@@ -14,86 +14,60 @@ export default function Tasks() {
 
   const token = localStorage.getItem("token");
 
-  // ============================
-  // FETCH TASKS
-  // ============================
   const fetchTasks = async () => {
-    try {
-      const res = await axios.get(`${API}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setTasks(res.data);
-    } catch (err) {
-      console.log(err.response?.data || err.message);
-    }
+    const res = await axios.get(`${API}/tasks`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setTasks(res.data);
   };
 
-  // ============================
-  // CREATE TASK
-  // ============================
   const createTask = async () => {
     if (!title) {
-      alert("Enter task title ❗");
+      alert("Enter task title");
       return;
     }
 
-    try {
-      await axios.post(
-        `${API}/tasks`,
-        { title, description },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    await axios.post(
+      `${API}/tasks`,
+      { title, description },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      alert("Task created ✅");
-
-      setTitle("");
-      setDescription("");
-      fetchTasks();
-    } catch (err) {
-      console.log(err.response?.data || err.message);
-      alert(err.response?.data?.msg || "Task creation failed ❌");
-    }
+    setTitle("");
+    setDescription("");
+    fetchTasks();
   };
 
-  // ============================
-  // DELETE TASK
-  // ============================
   const deleteTask = async (id) => {
-    try {
-      await axios.delete(`${API}/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+    await axios.delete(`${API}/tasks/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      alert("Task deleted 🗑");
-      fetchTasks();
-    } catch (err) {
-      console.log(err.response?.data || err.message);
-      alert("Delete failed ❌");
-    }
+    fetchTasks();
   };
 
-  // ============================
-  // UPDATE TASK
-  // ============================
   const updateTask = async (id) => {
-    try {
-      await axios.put(
-        `${API}/tasks/${id}`,
-        {
-          title: editTitle,
-          description: editDesc
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    await axios.put(
+      `${API}/tasks/${id}`,
+      {
+        title: editTitle,
+        description: editDesc
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      alert("Task updated ✏️");
+    setEditId(null);
+    fetchTasks();
+  };
 
-      setEditId(null);
-      fetchTasks();
-    } catch (err) {
-      console.log(err.response?.data || err.message);
-      alert("Update failed ❌");
-    }
+  const markComplete = async (id) => {
+    await axios.put(
+      `${API}/tasks/${id}/status`,
+      { status: "done" },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    fetchTasks();
   };
 
   useEffect(() => {
@@ -104,7 +78,7 @@ export default function Tasks() {
     <div className="main">
       <h1>Tasks</h1>
 
-      {/* ================= CREATE ================= */}
+      {/* CREATE */}
       <input
         placeholder="Task Title"
         value={title}
@@ -121,7 +95,7 @@ export default function Tasks() {
 
       <hr />
 
-      {/* ================= LIST ================= */}
+      {/* LIST */}
       {tasks.map((t) => (
         <div
           key={t._id}
@@ -134,7 +108,6 @@ export default function Tasks() {
         >
           {editId === t._id ? (
             <>
-              {/* EDIT MODE */}
               <input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
@@ -150,17 +123,26 @@ export default function Tasks() {
             </>
           ) : (
             <>
-              {/* VIEW MODE */}
               <h3>{t.title}</h3>
-              <p>{t.description || "No description"}</p>
+              <p>{t.description}</p>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "10px"
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+
+                {/* COMPLETE BUTTON */}
+                {t.status !== "done" && (
+                  <button
+                    onClick={() => markComplete(t._id)}
+                    style={{
+                      background: "#22c55e",
+                      color: "white",
+                      padding: "6px 12px",
+                      borderRadius: "6px"
+                    }}
+                  >
+                    Complete
+                  </button>
+                )}
+
                 <button
                   onClick={() => {
                     setEditId(t._id);
@@ -171,8 +153,7 @@ export default function Tasks() {
                     background: "#10b981",
                     color: "white",
                     padding: "6px 12px",
-                    borderRadius: "6px",
-                    border: "none"
+                    borderRadius: "6px"
                   }}
                 >
                   Edit
@@ -184,8 +165,7 @@ export default function Tasks() {
                     background: "#3b82f6",
                     color: "white",
                     padding: "6px 12px",
-                    borderRadius: "6px",
-                    border: "none"
+                    borderRadius: "6px"
                   }}
                 >
                   Delete
