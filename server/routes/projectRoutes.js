@@ -20,7 +20,6 @@ router.post("/", auth, async (req, res) => {
     res.json(project);
 
   } catch (err) {
-    console.log(err);
     res.status(500).json({ msg: "Server error" });
   }
 });
@@ -29,7 +28,7 @@ router.post("/", auth, async (req, res) => {
 // ================= GET PROJECTS =================
 router.get("/", auth, async (req, res) => {
   try {
-    const projects = await Project.find().populate("members", "name email");
+    const projects = await Project.find();
     res.json(projects);
 
   } catch (err) {
@@ -41,6 +40,8 @@ router.get("/", auth, async (req, res) => {
 // ================= DELETE PROJECT =================
 router.delete("/:id", auth, async (req, res) => {
   try {
+    console.log("USER:", req.user); // 🔥 DEBUG
+
     if (req.user.role !== "admin") {
       return res.status(403).json({ msg: "Only admin can delete project" });
     }

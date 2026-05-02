@@ -26,10 +26,7 @@ export default function Projects() {
     try {
       await axios.post(
         `${API}/projects`,
-        {
-          name,
-          description
-        },
+        { name, description },
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -56,6 +53,7 @@ export default function Projects() {
       fetchProjects();
 
     } catch (err) {
+      console.log(err.response?.data);
       alert(err.response?.data?.msg || "Delete failed");
     }
   };
@@ -88,13 +86,36 @@ export default function Projects() {
 
       {/* PROJECT LIST */}
       {projects.map(p => (
-        <div key={p._id} style={{ marginBottom: "20px" }}>
+        <div
+          key={p._id}
+          style={{
+            border: "1px solid #444",
+            padding: "15px",
+            marginBottom: "15px",
+            borderRadius: "8px",
+            position: "relative"
+          }}
+        >
+          {/* SMALL RIGHT DELETE BUTTON */}
+          <button
+            onClick={() => deleteProject(p._id)}
+            style={{
+              position: "absolute",
+              right: "10px",
+              top: "10px",
+              padding: "5px 10px",
+              background: "#ff4d4d",
+              border: "none",
+              borderRadius: "5px",
+              color: "white",
+              cursor: "pointer"
+            }}
+          >
+            ✖
+          </button>
+
           <h3>{p.name}</h3>
           <p>{p.description}</p>
-
-          <button onClick={() => deleteProject(p._id)}>
-            Delete
-          </button>
         </div>
       ))}
     </div>
